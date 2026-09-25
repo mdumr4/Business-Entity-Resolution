@@ -111,9 +111,24 @@ Once we have a Flow 1 leaderboard number, we execute the following phases. Each 
 
 **Gate:** Union recall ceiling ≥ 0.97 overall, and no country sits more than ~3–5 points below the others. If France-proxy (India-held-out) recall lags badly, that's a blocking problem to fix *before* any model tuning — a model can't recover a match that blocking never produced.
 
+### Phase 1.5 — Meta-Blocking (Weighted Candidate Pruning)
+
+**Why this exists:** The ER literature (Papadakis et al.) treats meta-blocking as its own established stage, separate from blocking itself. Our current Phase 1 unions blocking channels flatly — every candidate that survives any channel gets treated equally. A pair that both exact-match and dense retrieval surfaced is a much stronger candidate than one only the dense channel found. Right now that signal is discarded at the union step. Given F₀.₅'s precision weighting, recovering this signal for free (no extra recall cost, since we're only pruning within the union, not adding new candidates) is one of the highest-leverage, lowest-risk additions available.
+
+**Build:** Restructure the union of blocking-channel outputs into a weighted comparison graph. Each candidate pair gets a score based on *how many independent channels agreed on it, and how strongly* (e.g., channel-agreement count, per-channel rank position). Prune the weak-agreement tail before it ever reaches the GBDT.
+
+**Measure:** Precision/recall tradeoff of pruning at different weight cutoffs — same measure-then-gate discipline as everything else. Specifically: at what pruning threshold do we lose <0.5% recall while cutting candidate volume by X%?
+
+**Gate:** Meta-blocking achieves a measurable precision lift at blocking stage with recall loss < 0.5%. If it doesn't, skip it — the flat union is fine.
+
 ### Phase 2 — Candidate Model Exploration (A–D), Each Judged on Segments
 
 **Build:** Candidate C (feature-stack GBDT) first — cheapest, closest to Flow 1. Recalibrate without aggressive `scale_pos_weight`. Run Candidate A (frozen-embedding rerank) and, budget-permitting, B (cross-encoder shortlist) and D (graph consistency) as **separate experiments**, not sequential replacements.
+
+**Candidate B upgrade (Ditto-style):** Li et al. (VLDB 2020) validated cross-encoder reranking on a real 789K×412K company-matching task (96.5% F1) — same domain as ours. Three concrete techniques to adopt:
+- **Domain knowledge injection (span highlighting):** Wrap important sub-fields (postal code, city tokens) in special markers so the transformer knows which spans matter, rather than feeding raw concatenated text.
+- **Hard-negative data augmentation:** Attribute shuffling, span deletion — forces the model to learn the actual decision boundary rather than spurious correlates like "same country + similar length → match."
+- **Compute budget gate:** Ditto's benchmark was ~an order of magnitude smaller than our post-blocking volume. Size it explicitly: pairs-per-second throughput on L4 GPU × ~3.4M shortlisted pairs. If it doesn't fit in the time budget, Candidate B stays as Top-2-only or gets cut.
 
 **Measure, per model:**
 - **Precision/recall curve** (not a single point) at the pair level.
@@ -156,4 +171,25 @@ Once we have a Flow 1 leaderboard number, we execute the following phases. Each 
 
 ### Phase 7 — Production Packaging
 
-Final `matching_results.tsv` / `candidate_pairs.tsv` generation, `validate_submission.py` clean run, code/README/requirements matching the submission structure, methodology doc filled in with the actual diagnostics from Phases 0–6 (not just the final architecture) — the diagnostic trail *is* the differentiator the review of top teams' packages will be looking for.
+Final `matching_results.tsv` / `candidate_pairs.tsv` generation, `validate_submission.py` clean run, code/README/requirements matching the submission structure, methodology doc filled in with the actual diagnostics from Phases 0–7 (not just the final architecture) — the diagnostic trail *is* the differentiator the review of top teams' packages will be looking for.
+
+---
+
+## 6. Risk Flags
+
+These are load-bearing assumptions and constraints that the plan doesn't fully resolve yet. Each must be addressed or explicitly accepted before the phase that depends on it.
+
+| Risk | Depends On | Mitigation |
+|---|---|---|
+| **No published benchmark matches this exact setup** (3-source, cross-script, one country held out entirely at test time). The country-held-out proxy (India-as-France-stand-in) is our only calibration signal; there's no external number to sanity-check it against. | Phase 6 | Accept this — Phase 6's drift audit is carrying more weight than usual. Be extra conservative about trusting a single proxy split. |
+| **One-record-one-business assumption** underlying Phase 4 is still unverified. | Phase 0 | Must be checked in Phase 0 before Phase 4 is built. If violated, Phase 4's greedy assignment is unsafe. |
+| **Compute budget for Candidate B (cross-encoder).** Ditto's own benchmark is ~10x smaller than our post-blocking volume. "Top-2 shortlist only" is the right mitigation, but it needs a real throughput number, not a design intent. | Phase 2 | Size it explicitly in Phase 2: measure pairs/second on L4, multiply by shortlist volume, compare to available wall-clock time. |
+| **Class imbalance and spurious correlates.** With imbalance this extreme, any model (GBDT or cross-encoder) can learn "same country + similar length → match" instead of real name/address correspondence. | Phase 2 | Ditto-style hard-negative augmentation for Candidate B. For Candidate C, calibration reliability curves will surface this if it's happening. |
+
+---
+
+## 7. Literature References
+
+- **Papadakis et al.** — Blocking/filtering/meta-blocking survey. Standard reference for the two-stage ER architecture and meta-blocking as a distinct, established stage.
+- **Li et al. (Ditto), VLDB 2020** — Cross-encoder entity matching as sequence-pair classification. Domain knowledge injection (span highlighting), hard-negative augmentation. 96.5% F1 on 789K×412K company matching.
+- **AWS Entity Resolution** — Industry pattern: rule-based + ML split, confirming the GBDT-with-string-features approach as production-grade.
