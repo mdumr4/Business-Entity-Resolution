@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+output/candidate_pairs.tsv
+output/matching_results.tsv
+dataset/
+*.npy
+*.pkl
+*.parquet

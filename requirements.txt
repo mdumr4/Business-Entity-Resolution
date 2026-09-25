@@ -1,0 +1,15 @@
+pandas
+numpy
+scikit-learn
+xgboost
+lightgbm
+catboost
+sentence-transformers
+faiss-gpu
+faiss-cpu
+polars
+dask
+networkx
+scipy
+notebook
+tqdm
