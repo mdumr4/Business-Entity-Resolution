@@ -8,3 +8,8 @@ dataset/
 *.npy
 *.pkl
 *.parquet
+
+models/
+output/
+src.zip
+.DS_Store
