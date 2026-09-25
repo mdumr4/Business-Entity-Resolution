@@ -24,9 +24,10 @@ def main(data_dir: str, output_dir: str):
     out_path.mkdir(exist_ok=True)
     
     print("Loading datasets for Lexical Blocking...")
-    s1 = prepare_dataframe(pl.read_csv(data_path / "train_source1.tsv", separator="\t"))
-    s2 = prepare_dataframe(pl.read_csv(data_path / "train_source2.tsv", separator="\t"))
-    s3 = prepare_dataframe(pl.read_csv(data_path / "train_source3.tsv", separator="\t"))
+    prefix = "test" if "test" in data_dir.lower() else "train"
+    s1 = prepare_dataframe(pl.read_csv(data_path / f"{prefix}_source1.tsv", separator="\t"))
+    s2 = prepare_dataframe(pl.read_csv(data_path / f"{prefix}_source2.tsv", separator="\t"))
+    s3 = prepare_dataframe(pl.read_csv(data_path / f"{prefix}_source3.tsv", separator="\t"))
     
     candidates_df = pl.concat([s2, s3])
     candidate_ids = candidates_df["entity_id"].to_numpy()
@@ -50,7 +51,7 @@ def main(data_dir: str, output_dir: str):
     TOP_K = 20
     results = []
     
-    BATCH_SIZE = 500
+    BATCH_SIZE = 10
     num_queries = query_tfidf.shape[0]
     
     print("Computing Sparse Cosine Similarity in batches...")
@@ -95,8 +96,8 @@ def main(data_dir: str, output_dir: str):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data-dir", type=str, default="../../dataset/train")
-    parser.add_argument("--output-dir", type=str, default="../../output")
+    parser.add_argument("--data-dir", type=str, default="dataset/train")
+    parser.add_argument("--output-dir", type=str, default="output")
     args = parser.parse_args()
     
     main(args.data_dir, args.output_dir)

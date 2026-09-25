@@ -23,8 +23,13 @@ def normalize_text(series: pl.Series) -> pl.Series:
     Pure-algorithm text normalization. 
     Complies with rules: No external geo-databases, no APIs.
     """
+    # 0. Universal ASCII Transliteration (Handles Hindi Devanagari -> Latin AND French Accents -> ASCII)
+    # This must happen before lowercasing, as unidecode handles casing translation better on raw text
+    from unidecode import unidecode
+    s = series.map_elements(lambda x: unidecode(x) if isinstance(x, str) else x, return_dtype=pl.Utf8)
+    
     # 1. Lowercase
-    s = series.str.to_lowercase()
+    s = s.str.to_lowercase()
     
     # 2. Remove special characters (keep alphanumeric and spaces)
     s = s.str.replace_all(r"[^a-z0-9\s]", " ")

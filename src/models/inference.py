@@ -79,31 +79,43 @@ def run_inference(test_df: pl.DataFrame, model_dir: Path, output_dir: Path, thre
     
     print("Selecting the highest scoring candidate for each S1 Entity...")
     # Sort by score descending, then group by source 1 and take the top 1
-    final_predictions = (
+    top_predictions = (
         filtered_df
         .sort(["source1_entity_id", "match_score"], descending=[False, True])
         .group_by("source1_entity_id")
         .head(1)
     )
     
-    # Format for hackathon submission (usually a CSV with two columns)
+    # We must ensure every S1 query from the test set is present in the final output!
+    # Even if no candidates passed the threshold.
+    all_s1_ids = test_df.select("source1_entity_id").unique()
+    
+    # Left join all S1 IDs with our top predictions
+    final_predictions = all_s1_ids.join(
+        top_predictions.select(["source1_entity_id", "candidate_entity_id"]),
+        on="source1_entity_id",
+        how="left"
+    )
+    
+    # Format for hackathon submission: TAB separated, exact headers. 
     submission = final_predictions.select([
         pl.col("source1_entity_id"),
-        pl.col("candidate_entity_id")
+        pl.col("candidate_entity_id").alias("matched_entity_ids")
     ])
     
-    sub_path = output_dir / "submission.csv"
-    submission.write_csv(sub_path)
+    sub_path = output_dir / "matching_results.tsv"
+    # use null_value="" to output empty tabs for nulls, otherwise Polars writes actual "" strings
+    submission.write_csv(sub_path, separator="\t", null_value="")
     print(f"Done! Final predictions saved to {sub_path}")
-    print(f"Total Matches Predicted: {submission.shape[0]}")
+    print(f"Total Matches Predicted: {submission.filter(pl.col('matched_entity_ids').is_not_null()).shape[0]}")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data-dir", type=str, default="../../dataset/test", help="Path to test datasets")
+    parser.add_argument("--data-dir", type=str, default="dataset/test", help="Path to test datasets")
     parser.add_argument("--candidates-file", type=str, required=True, help="Path to test candidate pairs TSV")
-    parser.add_argument("--model-dir", type=str, default="../../models", help="Path to trained XGBoost model")
-    parser.add_argument("--output-dir", type=str, default="../../output", help="Path to save submission.csv")
+    parser.add_argument("--model-dir", type=str, default="models", help="Path to trained XGBoost model")
+    parser.add_argument("--output-dir", type=str, default="output", help="Path to save submission.csv")
     parser.add_argument("--threshold", type=float, default=0.5, help="Confidence threshold to declare a match")
     args = parser.parse_args()
     

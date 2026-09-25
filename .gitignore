@@ -9,7 +9,7 @@ dataset/
 *.pkl
 *.parquet
 
-models/
+/models/
 output/
 src.zip
 .DS_Store

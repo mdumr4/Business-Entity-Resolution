@@ -8,19 +8,19 @@ def main(data_dir: str, output_dir: str):
     out_path.mkdir(exist_ok=True)
     
     print("Loading data for Exact Match Blocking...")
-    s1 = pl.read_csv(data_path / "train_source1.tsv", separator="\t")
-    s2 = pl.read_csv(data_path / "train_source2.tsv", separator="\t")
-    s3 = pl.read_csv(data_path / "train_source3.tsv", separator="\t")
+    prefix = "test" if "test" in data_dir.lower() else "train"
+    s1 = pl.read_csv(data_path / f"{prefix}_source1.tsv", separator="\t")
+    s2 = pl.read_csv(data_path / f"{prefix}_source2.tsv", separator="\t")
+    s3 = pl.read_csv(data_path / f"{prefix}_source3.tsv", separator="\t")
     
-    # Simple normalization for exact matching
-    def normalize(df):
-        return df.with_columns([
-            pl.col("business_name").str.to_lowercase().str.replace_all(r"[^a-z0-9]", "").alias("norm_name"),
-            pl.col("business_address").str.to_lowercase().str.replace_all(r"[^a-z0-9]", "").alias("norm_addr")
-        ])
-        
-    s1 = normalize(s1)
-    candidates = normalize(pl.concat([s2, s3]))
+    import sys
+    import os
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+    from src.features.address_normalizer import prepare_dataframe
+
+    # Apply Universal Normalizer
+    s1 = prepare_dataframe(s1)
+    candidates = prepare_dataframe(pl.concat([s2, s3]))
     
     print("Performing Exact Match Joins...")
     
@@ -37,8 +37,8 @@ def main(data_dir: str, output_dir: str):
     
     # Join on Address
     addr_matches = s1.join(
-        candidates.filter(pl.col("norm_addr").is_not_null() & (pl.col("norm_addr") != "")),
-        on="norm_addr", 
+        candidates.filter(pl.col("norm_address").is_not_null() & (pl.col("norm_address") != "")),
+        on="norm_address", 
         how="inner"
     ).select([
         pl.col("entity_id").alias("source1_entity_id"),
@@ -69,8 +69,8 @@ def main(data_dir: str, output_dir: str):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data-dir", type=str, default="../../dataset/train")
-    parser.add_argument("--output-dir", type=str, default="../../output")
+    parser.add_argument("--data-dir", type=str, default="dataset/train")
+    parser.add_argument("--output-dir", type=str, default="output")
     args = parser.parse_args()
     
     main(args.data_dir, args.output_dir)

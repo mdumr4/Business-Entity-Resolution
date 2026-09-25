@@ -7,13 +7,19 @@ from pathlib import Path
 from tqdm import tqdm
 from sentence_transformers import SentenceTransformer
 
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+from src.features.address_normalizer import prepare_dataframe
+
 def create_text_field(df: pl.DataFrame) -> pl.DataFrame:
+    df = prepare_dataframe(df)
     return df.with_columns(
         pl.concat_str(
             [
-                pl.col("business_name").fill_null(""),
+                pl.col("norm_name"),
                 pl.lit(" | "),
-                pl.col("business_address").fill_null("")
+                pl.col("norm_address")
             ]
         ).alias("text_for_embedding")
     )
@@ -39,7 +45,9 @@ def main(data_dir: str, output_dir: str):
     model = SentenceTransformer(model_name, device=device, model_kwargs={"torch_dtype": torch.float16})
     
     print("Loading Source 1 (Queries)...")
-    s1 = create_text_field(pl.read_csv(data_path / "train_source1.tsv", separator="\t"))
+    s1_path = data_path / "train_source1.tsv"
+    if not s1_path.exists(): s1_path = data_path / "test_source1.tsv"
+    s1 = create_text_field(pl.read_csv(s1_path, separator="\t"))
     s1_texts = s1["text_for_embedding"].to_list()
     
     print(f"Extracting embeddings for {len(s1_texts)} S1 rows...")
@@ -54,8 +62,13 @@ def main(data_dir: str, output_dir: str):
     global_topk_indices = torch.zeros((num_queries, TOP_K), dtype=torch.long, device=device)
     
     print("Loading Source 2 and 3 Entity IDs...")
-    s2 = create_text_field(pl.read_csv(data_path / "train_source2.tsv", separator="\t"))
-    s3 = create_text_field(pl.read_csv(data_path / "train_source3.tsv", separator="\t"))
+    s2_path = data_path / "train_source2.tsv"
+    if not s2_path.exists(): s2_path = data_path / "test_source2.tsv"
+    s3_path = data_path / "train_source3.tsv"
+    if not s3_path.exists(): s3_path = data_path / "test_source3.tsv"
+    
+    s2 = create_text_field(pl.read_csv(s2_path, separator="\t"))
+    s3 = create_text_field(pl.read_csv(s3_path, separator="\t"))
     candidates_df = pl.concat([s2, s3])
     candidate_ids = candidates_df["entity_id"].to_numpy()
     candidate_texts = candidates_df["text_for_embedding"].to_list()

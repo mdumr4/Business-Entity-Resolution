@@ -13,3 +13,5 @@ networkx
 scipy
 notebook
 tqdm
+unidecode
+rapidfuzz
