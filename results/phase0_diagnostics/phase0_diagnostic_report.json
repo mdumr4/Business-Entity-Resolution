@@ -1,0 +1,80 @@
+{
+    "missing_field_rates": {
+        "S1": [
+            {
+                "country": "India",
+                "total_rows": 883188,
+                "name_nulls": 0,
+                "addr_nulls": 0,
+                "name_missing_pct": 0.0,
+                "addr_missing_pct": 0.0
+            },
+            {
+                "country": "US",
+                "total_rows": 1323633,
+                "name_nulls": 0,
+                "addr_nulls": 0,
+                "name_missing_pct": 0.0,
+                "addr_missing_pct": 0.0
+            }
+        ],
+        "S2": [
+            {
+                "country": "US",
+                "total_rows": 3016817,
+                "name_nulls": 0,
+                "addr_nulls": 111121,
+                "name_missing_pct": 0.0,
+                "addr_missing_pct": 0.03683385502004265
+            },
+            {
+                "country": "India",
+                "total_rows": 2017799,
+                "name_nulls": 0,
+                "addr_nulls": 57846,
+                "name_missing_pct": 0.0,
+                "addr_missing_pct": 0.028667870288368664
+            }
+        ],
+        "S3": [
+            {
+                "country": "US",
+                "total_rows": 3170056,
+                "name_nulls": 0,
+                "addr_nulls": 110968,
+                "name_missing_pct": 0.0,
+                "addr_missing_pct": 0.035005059847523196
+            },
+            {
+                "country": "India",
+                "total_rows": 2115547,
+                "name_nulls": 0,
+                "addr_nulls": 64948,
+                "name_missing_pct": 0.0,
+                "addr_missing_pct": 0.030700334239797084
+            }
+        ]
+    },
+    "match_distribution": [
+        {
+            "country": "India",
+            "total_s1_entities_with_matches": 883188,
+            "singleton_count": 96819,
+            "median_matches": 3.0,
+            "total_s2_matches": 1480545,
+            "total_s3_matches": 1628649
+        },
+        {
+            "country": "US",
+            "total_s1_entities_with_matches": 1323633,
+            "singleton_count": 145585,
+            "median_matches": 3.0,
+            "total_s2_matches": 2213074,
+            "total_s3_matches": 2439344
+        }
+    ],
+    "one_record_one_business": {
+        "is_safe_to_apply_phase4_conflict_resolution": false,
+        "target_entities_with_multiple_s1_parents": 1
+    }
+}
