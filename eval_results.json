@@ -1,0 +1,173 @@
+{
+  "threshold": 0.63,
+  "n_entities": 315196,
+  "macro_f05": 0.9082344490884394,
+  "macro_f05_ci95": [
+    0.9075387238190951,
+    0.9088873426581665
+  ],
+  "singleton_correct_empty_rate": 0.8853761622992392,
+  "has_match_predicted_empty_rate": 0.02250454696739967,
+  "floor_all_empty_f05": 0.05629830327796038,
+  "ceiling_perfect_ranker_f05": 0.9787864703844164,
+  "funnel": {
+    "true_pairs_total": 1089918,
+    "candidate_recall_L1_L2": 0.9434306067061926,
+    "final_recall": 0.8231720184454243,
+    "final_precision_micro": 0.9708314487104851,
+    "by_country": {
+      "India": {
+        "candidate_recall": 0.9126343037318194,
+        "final_recall": 0.7983091842869797
+      },
+      "US": {
+        "candidate_recall": 0.9639456884638433,
+        "final_recall": 0.839734495958126
+      }
+    }
+  },
+  "strata": {
+    "country=India": {
+      "n_entities": 126005,
+      "macro_f05": 0.8893177866236764
+    },
+    "country=US": {
+      "n_entities": 189191,
+      "macro_f05": 0.9208333256410901
+    },
+    "true_matches=0 (singleton)": {
+      "n_entities": 17745,
+      "macro_f05": 0.8853761622992392
+    },
+    "true_matches=1": {
+      "n_entities": 16902,
+      "macro_f05": 0.7835989952446759
+    },
+    "true_matches=2-3": {
+      "n_entities": 129644,
+      "macro_f05": 0.9023815552496738
+    },
+    "true_matches=4-5": {
+      "n_entities": 115084,
+      "macro_f05": 0.9279683934653501
+    },
+    "true_matches>=6": {
+      "n_entities": 35821,
+      "macro_f05": 0.936149360846968
+    },
+    "candidates=0": {
+      "n_entities": 71,
+      "macro_f05": 0.647887323943662
+    },
+    "candidates=1-9": {
+      "n_entities": 121928,
+      "macro_f05": 0.9019539765889497
+    },
+    "candidates=10-19": {
+      "n_entities": 122879,
+      "macro_f05": 0.9170387029249519
+    },
+    "candidates>=20 (fat tail)": {
+      "n_entities": 70318,
+      "macro_f05": 0.9040021357351915
+    }
+  },
+  "parsimony": {
+    "avg_candidates": 14.853411845327987,
+    "median": 12.0,
+    "p95": 39.0,
+    "max": 100,
+    "pct_entities_zero_candidates": 0.02252566656937271
+  },
+  "calibration": {
+    "ece": 0.002935801896585059,
+    "bins": [
+      {
+        "bin": "0.0-0.1",
+        "mean_pred": 0.006615418940782547,
+        "frac_positive": 0.005333426112912548,
+        "n": 3334067
+      },
+      {
+        "bin": "0.1-0.2",
+        "mean_pred": 0.14413419365882874,
+        "frac_positive": 0.13108016267705153,
+        "n": 185398
+      },
+      {
+        "bin": "0.2-0.3",
+        "mean_pred": 0.24570225179195404,
+        "frac_positive": 0.24344199434808644,
+        "n": 95189
+      },
+      {
+        "bin": "0.3-0.4",
+        "mean_pred": 0.346708744764328,
+        "frac_positive": 0.36306046195652175,
+        "n": 58880
+      },
+      {
+        "bin": "0.4-0.5",
+        "mean_pred": 0.4475158452987671,
+        "frac_positive": 0.47209907478797225,
+        "n": 41504
+      },
+      {
+        "bin": "0.5-0.6",
+        "mean_pred": 0.5489957332611084,
+        "frac_positive": 0.5698617788461539,
+        "n": 33280
+      },
+      {
+        "bin": "0.6-0.7",
+        "mean_pred": 0.6502417922019958,
+        "frac_positive": 0.6701741889529237,
+        "n": 30886
+      },
+      {
+        "bin": "0.7-0.8",
+        "mean_pred": 0.751338005065918,
+        "frac_positive": 0.7697586370089919,
+        "n": 33808
+      },
+      {
+        "bin": "0.8-0.9",
+        "mean_pred": 0.8543661236763,
+        "frac_positive": 0.8814301030566921,
+        "n": 45703
+      },
+      {
+        "bin": "0.9-1.0",
+        "mean_pred": 0.9895005822181702,
+        "frac_positive": 0.9915445656915194,
+        "n": 823021
+      }
+    ]
+  },
+  "tune_macro_f05_at_threshold": 0.9085452215233069,
+  "oracle_threshold_on_holdout": [
+    0.63,
+    0.9082344490884394
+  ],
+  "conflict_resolution": {
+    "threshold": 0.62,
+    "macro_f05": 0.9086801023030341,
+    "delta_vs_plain": 0.00044565321459466567,
+    "note": "LOWER BOUND: only holdout entities compete for a candidate; at test time all S1 entities compete."
+  },
+  "feature_importance": {
+    "name_cos": 0.16911616921424866,
+    "addr_cos": 0.03639722615480423,
+    "name_jac": 0.022475657984614372,
+    "addr_jac": 0.0048981159925460815,
+    "num_jac": 0.10270301252603531,
+    "name_exact": 0.008392886258661747,
+    "name_tfidf": 0.016984358429908752,
+    "addr_tfidf": 0.1838822215795517,
+    "name_lev": 0.01960633508861065,
+    "addr_lev": 0.014749567024409771,
+    "addr_cos_gap_from_top": 0.003790643298998475,
+    "name_cos_gap_from_top": 0.0032543311826884747,
+    "addr_cos_rank": 0.4137495458126068
+  }
+}
