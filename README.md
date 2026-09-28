@@ -36,8 +36,9 @@ The matching pipeline is built as a highly-efficient 3-stage funnel:
 ├── utils/
 │   └── validate_submission.py  # Script to validate submission format
 ├── output/                     # Generated artifacts (embeddings, FAISS indices, models, outputs)
-├── PROJECT_REPORT.md           # Detailed engineering and evaluation report
-├── CHALLENGE_PROMPT.md         # Original competition instructions
+├── docs/                       # Project documentation and reports
+│   ├── PROJECT_REPORT.md       # Detailed engineering and evaluation report
+│   └── CHALLENGE_PROMPT.md     # Original competition instructions
 └── evaluate_pipeline.py        # End-to-end evaluation pipeline with strict holdout splitting
 ```
 
