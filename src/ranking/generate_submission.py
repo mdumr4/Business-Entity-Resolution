@@ -84,7 +84,7 @@ def tfidf_cosine(s1, s2, idf_dict, default_idf):
 
 
 def main():
-    split = "test"
+    split = "train"
     print("=" * 60)
     print("  UNIFIED TEST INFERENCE PIPELINE")
     print("=" * 60)

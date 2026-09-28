@@ -22,7 +22,7 @@ Stdlib only, Python 3.8+. Run from the ``student_resource/`` directory::
     python3 utils/validate_submission.py \
         --matching output/matching_results.tsv \
         --candidate output/candidate_pairs.tsv \
-        --test-dir dataset/test
+        --test-dir dataset/train
 
 Exit code 0 means the files are safe to submit; 1 means fix the listed issues
 (warnings never fail the run).
@@ -292,7 +292,7 @@ def main():
     parser.add_argument(
         "--test-dir",
         "-t",
-        default="dataset/test",
+        default="dataset/train",
         help="Folder with test_source1/2/3.tsv (default: %(default)s). "
         "test_source2/3.tsv are only read when --check-ids is given.",
     )
