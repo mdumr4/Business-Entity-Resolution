@@ -24,15 +24,14 @@ The matching pipeline is built as a highly-efficient 3-stage funnel:
 ├── dataset/
 │   └── train/                  # Contains *_source1.tsv, *_source2.tsv, *_source3.tsv
 ├── src/                        # Core pipeline source code
-│   ├── blocking/               # L1 Retrieval and L2 Pruner scripts
-│   │   ├── build_faiss_index.py
-│   │   ├── generate_candidate_pairs.py
-│   │   └── train_l2_pruner.py
-│   ├── ranking/                # L3 Ranker and inference scripts
-│   │   ├── extract_ranker_features.py
-│   │   ├── generate_submission.py
-│   │   └── train_ranker.py
-│   └── advanced_evaluation.py  # Advanced evaluation script
+│   ├── build_faiss_index.py    # Builds the FAISS HNSW index from candidates
+│   ├── generate_submission.py  # Unified inference script (Retrieval -> Pruning -> Ranking)
+│   └── training/               # Build-time and training scripts
+│       ├── generate_candidate_pairs.py
+│       ├── train_l2_pruner.py
+│       ├── extract_ranker_features.py
+│       ├── train_ranker.py
+│       └── advanced_evaluation.py
 ├── utils/
 │   └── validate_submission.py  # Script to validate submission format
 ├── output/                     # Generated artifacts (embeddings, FAISS indices, models, outputs)
@@ -51,19 +50,19 @@ To run the pipeline from scratch on the `train` dataset:
 ### 1. Build L1 FAISS Indices
 Encodes all target candidates into dense representations and builds the HNSW index.
 ```bash
-python src/blocking/build_faiss_index.py
+python src/build_faiss_index.py
 ```
 
 ### 2. Generate Candidate Pairs (L1 + L2)
 Queries the FAISS index to get top candidates, then applies the cheap L2 pruner.
 ```bash
-python src/blocking/generate_candidate_pairs.py --threshold 0.05
+python src/training/generate_candidate_pairs.py --threshold 0.05
 ```
 
 ### 3. Extract L3 Ranker Features
 Computes the expensive TF-IDF, Levenshtein, and Jaccard features for the surviving pairs.
 ```bash
-python src/ranking/extract_ranker_features.py
+python src/training/extract_ranker_features.py
 ```
 
 ### 4. Evaluate the Pipeline
@@ -73,9 +72,9 @@ python evaluate_pipeline.py --ablate --transfer --save-model
 ```
 
 ### 5. Generate Final Submission (Inference)
-Runs the trained L3 Ranker on the chosen dataset to produce the final `matching_results.tsv` file.
+Runs the unified inference pipeline (L1 -> L2 -> L3 Ranker) to produce the final `matching_results.tsv` file.
 ```bash
-python src/ranking/generate_submission.py
+python src/generate_submission.py
 ```
 
 ### 6. Validate Output
