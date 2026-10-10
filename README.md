@@ -138,11 +138,9 @@ During iterative development, empirical measurements caught several critical bug
 │   ├── models/                      # ML Model definitions
 │   │   ├── l2_pruner.py             # 8-feature recall-biased XGBoost pruner
 │   │   └── l3_ranker.py             # 13-feature precision XGBoost ranker + conflict resolution
-│   ├── pipeline/                    # Unified pipeline runners
-│   │   ├── build_index.py           # Parameterized dual-lane FAISS HNSW builder
-│   │   └── predict.py               # End-to-end inference engine with checkpoints
-│   ├── training/                    # Build-time and training scripts
-│   └── generate_submission.py       # Backward-compatible inference entry point
+│   └── pipeline/                    # Unified pipeline runners
+│       ├── build_index.py           # Parameterized dual-lane FAISS HNSW builder
+│       └── predict.py               # End-to-end inference engine with checkpoints
 ├── scripts/
 │   ├── quickstart_demo.py           # 30-second local CPU smoke test (zero data needed)
 │   ├── download_assets.py           # Hugging Face Hub asset downloader
@@ -197,8 +195,8 @@ Evaluate the ranker on 315,196 clean held-out entities using the deterministic h
 python evaluate_pipeline.py --device cpu
 ```
 
-### Track 4: Cloud Training from Scratch (GCP Vertex AI / NVIDIA L4)
-To reproduce the full pipeline from raw data:
+### Track 4: Cloud Training & Inference from Scratch (GCP Vertex AI / NVIDIA L4)
+To run the full end-to-end pipeline from raw data:
 ```bash
 # 1. Provision GCP VM
 bash scripts/setup_gcp_vm.sh
@@ -206,17 +204,12 @@ bash scripts/setup_gcp_vm.sh
 # 2. Build Dual-Lane FAISS HNSW Indices (~2 hours on GPU)
 python src/pipeline/build_index.py --split train
 
-# 3. Generate candidate pairs (L1 + L2)
-python src/training/generate_candidate_pairs.py --threshold 0.05
+# 3. Run full cascading funnel (L1 retrieval -> L2 pruner -> L3 features -> ranking)
+python src/pipeline/predict.py --split train
 
-# 4. Extract L3 ranker features
-python src/training/extract_ranker_features.py
-
-# 5. Evaluate and save models
+# 4. Evaluate and save models with zero-leakage hash splitting
 python evaluate_pipeline.py --ablate --transfer --save-model
 
-# 6. Run end-to-end inference
-python src/pipeline/predict.py --split test
 ```
 
 ---
