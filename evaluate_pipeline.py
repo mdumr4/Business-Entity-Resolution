@@ -30,12 +30,13 @@ import argparse, json, os, time, zlib
 import numpy as np
 import polars as pl
 import xgboost as xgb
-
-BASE = ["name_cos", "addr_cos", "name_jac", "addr_jac", "num_jac", "name_exact",
-        "name_tfidf", "addr_tfidf", "name_lev", "addr_lev"]
-REL = ["addr_cos_gap_from_top", "name_cos_gap_from_top", "addr_cos_rank"]
-ALL_FEATS = BASE + REL
+from src.models.l3_ranker import (
+    BASE_RANKER_FEATURES as BASE,
+    RELATIVE_RANKER_FEATURES as REL,
+    ALL_RANKER_FEATURES as ALL_FEATS,
+)
 DESIGN_SEEDS = (42, 43)
+
 THRESHOLDS = np.round(np.arange(0.05, 0.991, 0.01), 2)
 
 
