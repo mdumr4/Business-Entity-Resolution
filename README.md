@@ -167,8 +167,8 @@ During iterative development, empirical measurements caught several critical bug
 Test and verify the entire 3-stage cascading pipeline locally on synthetic business records:
 ```bash
 # 1. Clone repository
-git clone https://github.com/your-username/AmazonML2026.git
-cd AmazonML2026
+git clone https://github.com/mdumr4/Business-Entity-Resolution.git
+cd Business-Entity-Resolution
 
 # 2. Setup virtual environment
 python3 -m venv venv
@@ -179,14 +179,15 @@ pip install -r requirements.txt
 python scripts/quickstart_demo.py
 ```
 
-### Track 2: Automated Asset Download via Hugging Face Hub
-Pull pre-trained models (<2 MB) or precomputed feature matrices (~1.5 GB):
+### Track 2: Sync Assets from Hugging Face Bucket
+Download pre-trained models (<2 MB) and precomputed feature matrices (~1.5 GB) from the official Hugging Face Bucket:
 ```bash
-# Download trained XGBoost weights
-python scripts/download_assets.py --models
+# Sync golden assets from Hugging Face Storage Bucket into output/
+hf sync hf://buckets/mdumr4/Business-Entity-Resolution output
 
-# Download feature matrices for instant evaluation
-python scripts/download_assets.py --features
+# Or run the downloader wrapper
+python scripts/download_assets.py
+
 ```
 
 ### Track 3: Run Full Evaluation Harness
